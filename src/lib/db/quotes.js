@@ -109,14 +109,20 @@ export async function getOpenLeadsCount() {
   return 0;
 }
 
-export async function getPendingApprovalsCount() {
+export async function getPendingApprovalsCount(approverId) {
   const client = getSupabaseClient();
 
   try {
-    const { count, error } = await client
+    let query = client
       .from("approval_requests")
       .select("id", { count: "exact", head: true })
       .eq("status", "pending");
+
+    if (approverId) {
+      query = query.eq("approver_id", approverId);
+    }
+
+    const { count, error } = await query;
 
     if (error) throw error;
     return count ?? 0;

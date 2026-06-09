@@ -64,7 +64,7 @@ export default function AppShell() {
       const [activeQuotes, openLeads, pendingApprovals, hasOrgConfig] = await Promise.all([
         getActiveQuoteCount({ locationIds, scopedToLocation }),
         getOpenLeadsCount(),
-        getPendingApprovalsCount(),
+        getPendingApprovalsCount(employee?.id),
         hasPermission(employee?.role_id, "org.config"),
       ]);
 
@@ -85,8 +85,9 @@ export default function AppShell() {
           { event: "*", schema: "public", table: "approval_requests" },
           async () => {
             const pendingApprovals = await getPendingApprovalsCount();
+            const scopedPendingApprovals = await getPendingApprovalsCount(employee?.id);
             if (!active) return;
-            setCounts((prev) => ({ ...prev, pendingApprovals }));
+            setCounts((prev) => ({ ...prev, pendingApprovals: scopedPendingApprovals || pendingApprovals }));
           }
         )
         .subscribe();
